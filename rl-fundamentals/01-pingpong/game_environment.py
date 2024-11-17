@@ -48,6 +48,12 @@ class PongEnvironment:
         """
         Execute one step in the environment
         Returns: (state, reward, done, info)
+        
+        TODO: Implement your reward function here. Consider:
+        - Ball hits
+        - Scoring points
+        - Paddle movement efficiency
+        - Game completion
         """
         # Execute action
         self.player.move(action)
@@ -55,25 +61,26 @@ class PongEnvironment:
         # Move ball
         self.ball.move()
         
-        # Check collisions
-        reward = 0
+        # Initialize reward and done flag
+        reward = 0  # TODO: Define your reward structure
         done = False
         
+        # Handle collisions
         if self.ball.rect.colliderect(self.player.rect) or \
            self.ball.rect.colliderect(self.opponent.rect):
             self.ball.speed_x *= -1
             self.ball.increase_speed()
-            reward += 1  # Reward for hitting the ball
+            # TODO: Define reward for ball hits
 
-        # Check scoring
+        # Handle scoring
         if self.ball.rect.left <= 0:
             self.opponent.score += 1
-            reward -= 5  # Penalty for losing point
+            # TODO: Define penalty for losing point
             self.ball.reset()
             done = True
         elif self.ball.rect.right >= self.screen_width:
             self.player.score += 1
-            reward += 5  # Reward for scoring
+            # TODO: Define reward for scoring
             self.ball.reset()
             done = True
 
