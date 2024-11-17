@@ -4,3 +4,6 @@ The following repository contains the source code of my PAM Project for ACECOM w
 OpenAI Gymnasium and Gym Retro APIs will be used with the [pokemon emerald decompilation](https://github.com/pret/pokeemerald.git) made by [pret](https://github.com/pret).
 ## Author:
 Ángel Aarón Flores Alberca
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
