@@ -1,42 +1,48 @@
 # Exercise 1: Ping Pong Q-Learning
 
-## Overview
-Implement Q-Learning to train an AI agent to play Ping Pong through self-play. The environment supports both human play and accelerated training modes.
+## Step-by-Step Guide
 
-## Tasks
-1. Implement state discretization for the continuous state space
-2. Design an appropriate reward function
-3. Create and implement the Q-Learning algorithm with self-play
-4. Add epsilon-greedy exploration strategy
-5. Train and evaluate your agent
+### 1. Environment Understanding
+- Review `game_environment.py` to understand:
+  - State space representation
+  - Available actions
+  - Game mechanics
+  - Reward placeholder structure
 
-## Environment Details
-- **State Space**: Continuous values for ball position, velocity, and paddle positions
-- **Action Space**: [-1, 0, 1] for [UP, STAY, DOWN]
-- **Training Modes**: 
-  - Human vs AI (visualization mode)
-  - AI vs AI (fast training mode)
+### 2. State Space Design
+- Implement discretization in `QAgent.discretize_state()`
+- Consider which state variables are most relevant
+- Choose appropriate bin sizes for each dimension
+
+### 3. Q-Learning Implementation
+- Complete the `QAgent` class in `train.py`:
+  ```python
+  def discretize_state()  # Convert continuous to discrete state
+  def get_action()        # Epsilon-greedy action selection
+  def update()           # Q-value update rule
+  ```
+
+### 4. Training Loop
+- Run training episodes in fast-forward mode
+- Monitor and log:
+  - Average rewards
+  - Win rates
+  - Q-value convergence
+- Save models periodically
+
+### 5. Evaluation
+- Test against rule-based AI
+- Analyze performance metrics
+- Visualize learned behavior
 
 ## Files
-- `game_environment.py`: The main environment (modify rewards here)
-- `game_objects.py`: Game object implementations
-- `main.py`: Game loop and visualization
-- `train.py`: (To be created) Training script for self-play
+- `game_environment.py`: Core game logic and RL interface
+- `game_objects.py`: Paddle and Ball implementations
+- `main.py`: Human vs AI gameplay
+- `train.py`: Self-play training implementation
 
-## Training Strategy
-1. Create two Q-tables, one for each paddle
-2. Run training episodes in fast-forward mode (no rendering)
-3. Periodically save the Q-tables and evaluate performance
-4. Use the best model for human vs AI matches
-
-## Getting Started
-1. Review the environment code
-2. Create `train.py` for accelerated self-play training
-3. Implement your reward function in `game_environment.py`
-4. Train your agents!
-
-## Tips
-- Use pygame.HIDDEN flag during training to avoid rendering
-- Save Q-tables periodically to resume training
-- Track metrics for both paddles during self-play
-- Evaluate against simple rule-based opponent periodically
+## Development Tips
+- Start with larger state space bins, then refine
+- Test reward functions incrementally
+- Use `set_training_mode(True)` for faster training
+- Save checkpoints to resume training
