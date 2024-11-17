@@ -37,6 +37,7 @@ class PongEnvironment:
         )
 
         self.reset()
+        self.font = pygame.font.Font(None, 74)
 
     def reset(self) -> Dict[str, float]:
         """Reset the environment and return initial state"""
@@ -106,4 +107,10 @@ class PongEnvironment:
         # Draw center line
         pygame.draw.aaline(screen, self.config['colors']['white'],
                           (self.screen_width // 2, 0),
-                          (self.screen_width // 2, self.screen_height)) 
+                          (self.screen_width // 2, self.screen_height))
+        
+        # Draw scores
+        player_text = self.font.render(str(self.player.score), True, self.config['colors']['white'])
+        opponent_text = self.font.render(str(self.opponent.score), True, self.config['colors']['white'])
+        screen.blit(player_text, (self.screen_width // 4, 20))
+        screen.blit(opponent_text, (3 * self.screen_width // 4, 20))
