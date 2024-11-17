@@ -62,6 +62,7 @@ class PongEnvironment:
         if self.ball.rect.colliderect(self.player.rect) or \
            self.ball.rect.colliderect(self.opponent.rect):
             self.ball.speed_x *= -1
+            self.ball.increase_speed()
             reward += 1  # Reward for hitting the ball
 
         # Check scoring

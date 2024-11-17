@@ -27,11 +27,30 @@ class Ball:
     def __init__(self, x: int, y: int, size: int, speed: int, screen_width: int, screen_height: int):
         self.rect = pygame.Rect(x, y, size, size)
         self.initial_speed = speed * 0.6  # Slower initial speed
-        self.speed = speed
+        self.base_speed = speed
+        self.speed_multiplier = 1.0  # New: for progressive difficulty
+        self.max_speed_multiplier = 2.0  # New: cap the maximum speed
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.start_delay = 30  # Frames to wait before moving
+        self.start_delay = 30
         self.reset()
+
+    def increase_speed(self):
+        """Increase speed after paddle hits"""
+        self.speed_multiplier = min(self.speed_multiplier * 1.1, self.max_speed_multiplier)
+        current_speed = (self.speed_x**2 + self.speed_y**2)**0.5
+        speed_ratio = current_speed / (self.base_speed * self.speed_multiplier)
+        
+        # Adjust current velocity to match new speed while maintaining direction
+        self.speed_x *= (self.base_speed * self.speed_multiplier * speed_ratio) / current_speed
+        self.speed_y *= (self.base_speed * self.speed_multiplier * speed_ratio) / current_speed
+
+    def reset(self) -> None:
+        self.rect.center = (self.screen_width // 2, self.screen_height // 2)
+        self.speed_multiplier = 1.0  # Reset speed multiplier
+        self.speed_x = self.initial_speed * random.choice((1, -1))
+        self.speed_y = self.initial_speed * random.choice((1, -1))
+        self.start_delay = 30
 
     def move(self) -> None:
         if self.start_delay > 0:
@@ -44,17 +63,13 @@ class Ball:
         if self.rect.top <= 0 or self.rect.bottom >= self.screen_height:
             self.speed_y *= -1
 
-    def reset(self) -> None:
-        self.rect.center = (self.screen_width // 2, self.screen_height // 2)
-        self.speed_x = self.initial_speed * random.choice((1, -1))
-        self.speed_y = self.initial_speed * random.choice((1, -1))
-        self.start_delay = 30  # Reset delay counter
-
     def get_state(self) -> Tuple[float, float, float, float]:
         """Return normalized ball position and velocity"""
         return (
+            # Center x and y normalized to screen size
             self.rect.centerx / self.screen_width,
             self.rect.centery / self.screen_height,
+            # Normalized speed
             self.speed_x / self.speed,
             self.speed_y / self.speed
         ) 
