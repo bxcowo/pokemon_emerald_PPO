@@ -70,6 +70,6 @@ class Ball:
             self.rect.centerx / self.screen_width,
             self.rect.centery / self.screen_height,
             # Normalized speed
-            self.speed_x / self.speed,
-            self.speed_y / self.speed
+            self.speed_x / self.base_speed,
+            self.speed_y / self.base_speed
         ) 
