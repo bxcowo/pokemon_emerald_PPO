@@ -42,10 +42,10 @@ class QAgent:
 def train(episodes: int = 10000, save_interval: int = 1000):
     """Train agents using self-play"""
     pygame.init()
-    # Initialize hidden display for faster training
     pygame.display.set_mode((1, 1), pygame.HIDDEN)
     
     env = PongEnvironment(CONFIG)
+    env.set_training_mode(True)  # Enable fast training mode
     
     # Initialize agents
     state_bins = {
@@ -66,12 +66,12 @@ def train(episodes: int = 10000, save_interval: int = 1000):
             action1 = agent1.get_action(state)
             action2 = agent2.get_action(state)
             
-            # TODO: Update environment to handle both actions
-            next_state, reward, done, _ = env.step(action1)
+            # Step environment with both actions
+            next_state, reward, done, _ = env.step(action1, action2)
             
             # Update both agents
             agent1.update(state, action1, reward, next_state)
-            agent2.update(state, action2, -reward, next_state)
+            agent2.update(state, action2, -reward, next_state)  # Opposite reward
             
             state = next_state
             

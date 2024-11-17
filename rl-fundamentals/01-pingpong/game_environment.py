@@ -38,28 +38,40 @@ class PongEnvironment:
 
         self.reset()
         self.font = pygame.font.Font(None, 74)
+        self.training_mode = False  # New flag for fast training
 
     def reset(self) -> Dict[str, float]:
         """Reset the environment and return initial state"""
         self.ball.reset()
         return self.get_state()
 
-    def step(self, action: int) -> Tuple[Dict[str, float], float, bool, Dict]:
+    def set_training_mode(self, training: bool = True) -> None:
+        """Toggle training mode for faster execution"""
+        self.training_mode = training
+
+    def step(self, player_action: int, opponent_action: int = None) -> Tuple[Dict[str, float], float, bool, Dict]:
         """
-        Execute one step in the environment
-        Returns: (state, reward, done, info)
-        
-        TODO: Implement your reward function here. Consider:
-        - Ball hits
-        - Scoring points
-        - Paddle movement efficiency
-        - Game completion
+        Execute one step with actions for both paddles
+        Args:
+            player_action: Action for left paddle
+            opponent_action: Action for right paddle (if None, use basic AI)
         """
-        # Execute action
-        self.player.move(action)
+        # Execute actions
+        self.player.move(player_action)
+        if opponent_action is not None:
+            self.opponent.move(opponent_action)
+        elif not self.training_mode:  # Basic AI for human play
+            if self.opponent.rect.centery < self.ball.rect.centery:
+                self.opponent.move(1)
+            elif self.opponent.rect.centery > self.ball.rect.centery:
+                self.opponent.move(-1)
         
-        # Move ball
-        self.ball.move()
+        # Move ball (faster in training mode)
+        if self.training_mode:
+            for _ in range(2):  # Speed up ball movement
+                self.ball.move()
+        else:
+            self.ball.move()
         
         # Initialize reward and done flag
         reward = 0  # TODO: Define your reward structure
@@ -103,8 +115,15 @@ class PongEnvironment:
             'opponent_score': opponent_state[1]
         }
 
-    def render(self, screen: pygame.Surface) -> None:
-        """Render the current game state"""
+    def render(self, screen: pygame.Surface = None) -> None:
+        """
+        Render the current game state
+        Args:
+            screen: Pygame surface (optional in training mode)
+        """
+        if self.training_mode or screen is None:
+            return
+            
         screen.fill(self.config['colors']['black'])
         
         # Draw paddles and ball
