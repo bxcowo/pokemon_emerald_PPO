@@ -1,6 +1,23 @@
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, List, Any
 import pygame
 from game_objects import Paddle, Ball
+
+class FixedOpponent:
+    """Oponente fijo que sigue la posición de la pelota."""
+
+    def __init__(self, paddle: Paddle, ball: Ball):
+        self.paddle = paddle
+        self.ball = ball
+
+    def get_action(self) -> int:
+        """Decide la acción basada en la posición de la pelota."""
+        if self.ball.rect.centery < self.paddle.rect.centery:
+            return -1  # Mover hacia arriba
+        elif self.ball.rect.centery > self.paddle.rect.centery:
+            return 1  # Mover hacia abajo
+        else:
+            return 0  # Mantenerse
+
 
 class PongEnvironment:
     def __init__(self, config: Dict[str, Any]):
@@ -43,58 +60,60 @@ class PongEnvironment:
     def reset(self) -> Dict[str, float]:
         """Reset the environment and return initial state"""
         self.ball.reset()
+        self.player.score = 0
+        self.opponent.score = 0
         return self.get_state()
 
     def set_training_mode(self, training: bool = True) -> None:
         """Toggle training mode for faster execution"""
         self.training_mode = training
+        if training:
+            self.ball.speed_multiplier = 2.0
+        else:
+            self.ball.speed_multiplier = 1.0
 
-    def step(self, player_action: int, opponent_action: int = None) -> Tuple[Dict[str, float], float, bool, Dict]:
+    def step(self, player_action: int, opponent_action: int) -> Tuple[Dict[str, float], float, bool, Dict]:
         """
         Execute one step with actions for both paddles
         Args:
             player_action: Action for left paddle
-            opponent_action: Action for right paddle (if None, use basic AI)
+            opponent_action: Action for right paddle
         """
+        # Part for Human VS Computer
         # Execute actions
+        # Initialize reward
+        reward = 0
         self.player.move(player_action)
-        if opponent_action is not None:
-            self.opponent.move(opponent_action)
-        elif not self.training_mode:  # Basic AI for human play
-            if self.opponent.rect.centery < self.ball.rect.centery:
-                self.opponent.move(1)
-            elif self.opponent.rect.centery > self.ball.rect.centery:
-                self.opponent.move(-1)
-        
-        # Move ball (faster in training mode)
-        if self.training_mode:
-            for _ in range(2):  # Speed up ball movement
-                self.ball.move()
-        else:
-            self.ball.move()
-        
-        # Initialize reward and done flag
-        reward = 0  # TODO: Define your reward structure
-        done = False
-        
+        if player_action == 0:
+            reward -= 0.1
+
+        self.opponent.move(opponent_action)
+
+        # Part for Q-Learning
+        self.ball.move()
+
         # Handle collisions
-        if self.ball.rect.colliderect(self.player.rect) or \
-           self.ball.rect.colliderect(self.opponent.rect):
+        if self.ball.rect.colliderect(self.player.rect):
             self.ball.speed_x *= -1
             self.ball.increase_speed()
-            # TODO: Define reward for ball hits
+            reward += 1
+
+        if self.ball.rect.colliderect(self.opponent.rect):
+            self.ball.speed_x *= -1
+            self.ball.increase_speed()
 
         # Handle scoring
         if self.ball.rect.left <= 0:
             self.opponent.score += 1
-            # TODO: Define penalty for losing point
+            reward -= 5
             self.ball.reset()
-            done = True
         elif self.ball.rect.right >= self.screen_width:
             self.player.score += 1
-            # TODO: Define reward for scoring
+            reward += 5
             self.ball.reset()
-            done = True
+
+        # Initialize done flag
+        done = self.player.score >= 5 or self.opponent.score >= 5
 
         return self.get_state(), reward, done, {}
 
@@ -110,9 +129,7 @@ class PongEnvironment:
             'ball_vx': ball_state[2],
             'ball_vy': ball_state[3],
             'player_y': player_state[0],
-            'opponent_y': opponent_state[0],
-            'player_score': player_state[1],
-            'opponent_score': opponent_state[1]
+            'opponent_y': opponent_state[0]
         }
 
     def render(self, screen: pygame.Surface = None) -> None:
@@ -141,3 +158,5 @@ class PongEnvironment:
         opponent_text = self.font.render(str(self.opponent.score), True, self.config['colors']['white'])
         screen.blit(player_text, (self.screen_width // 4, 20))
         screen.blit(opponent_text, (3 * self.screen_width // 4, 20))
+
+        pygame.display.flip()

@@ -21,7 +21,7 @@ class Paddle:
 
     def get_state(self) -> Tuple[float, float]:
         """Return normalized paddle position"""
-        return (self.rect.centery / self.screen_height, self.score)
+        return self.rect.centery / self.screen_height, self.score
 
 class Ball:
     def __init__(self, x: int, y: int, size: int, speed: int, screen_width: int, screen_height: int):
@@ -56,9 +56,9 @@ class Ball:
         if self.start_delay > 0:
             self.start_delay -= 1
             return
-            
-        self.rect.x += self.speed_x
-        self.rect.y += self.speed_y
+
+        self.rect.x += self.speed_x * self.speed_multiplier
+        self.rect.y += self.speed_y * self.speed_multiplier
 
         if self.rect.top <= 0 or self.rect.bottom >= self.screen_height:
             self.speed_y *= -1
